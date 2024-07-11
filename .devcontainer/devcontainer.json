@@ -1,0 +1,16 @@
+{
+	"name": "GeeksHacking Workshop - Developing GenAI Applications with LangChain",
+	"image": "python:3.11",
+	"hostRequirements": {
+		"cpus": 2
+	},
+	"forwardPorts": [ 8501 ],
+	"waitFor": "onCreateCommand",
+	"updateContentCommand": "python3 -m pip install -r requirements.txt",
+	"customizations": {
+		"vscode": {
+			"extensions": [ "ms-python.python", "ms-toolsai.jupyter" ], 
+			"postCreateCommand": "pip3 --disable-pip-version-check --no-cache-dir install -r requirements.txt"
+		}
+	}
+}

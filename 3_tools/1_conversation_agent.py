@@ -8,6 +8,11 @@ from langchain_community.callbacks import get_openai_callback
 
 from langchain.agents import AgentExecutor, create_react_agent
 
+llm = ChatOpenAI(name="gpt-3.5-turbo", temperature=0.1, verbose=True)
+tool_names = [ 'ddg-search', 'wikipedia', 'arxiv', 'stackexchange', 'llm-math' ]
+
+tools = load_tools(tool_names=tool_names, llm=llm)
+
 prompt_template_text = '''
 Answer the following questions as best you can. You have access to the following tools:
 
@@ -30,4 +35,27 @@ Question: {input}
 Thought:{agent_scratchpad}
 Previous conversation history: {chat_history}
 '''
+
+prompt = PromptTemplate.from_template(prompt_template_text)
+
+memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+
+agent = create_react_agent(llm=llm, tools=tools, prompt=prompt)
+executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, memory=memory,
+      verbose=True, handle_parsing_errors=True)
+
+with get_openai_callback() as cb:
+   while True:
+      print('============================\n')
+      try:
+         question = input('Question: ')
+         if not bool(question):
+            break
+         result = executor.invoke({ 'input': question })
+         print(result['output'])
+
+      except ValueError as err:
+         print(f'ERROR: {err}')
+
+      print('\n\n---------------\n', cb)
 
